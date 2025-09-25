@@ -13,6 +13,7 @@ const InAppNotification = ({ notification, onClose, onAction }) => {
     const updateTime = () => {
       const now = new Date();
       const diff = Math.floor((now - notification.timestamp) / 1000);
+      
       if (diff < 60) {
         setTimeAgo('now');
       } else if (diff < 3600) {
@@ -26,7 +27,7 @@ const InAppNotification = ({ notification, onClose, onAction }) => {
     const interval = setInterval(updateTime, 30000);
 
     // Auto-close non-persistent notifications
-    if (!notification.persistent) {
+    if (!notification.persistent && notification.priority !== 'urgent') {
       setTimeout(() => {
         handleClose();
       }, 10000);
@@ -50,34 +51,40 @@ const InAppNotification = ({ notification, onClose, onAction }) => {
 
   const getPriorityIcon = () => {
     switch (notification.priority) {
-      case 'urgent': return '🚨';
-      case 'high': return '🔥';
-      default: return '🔔';
+      case 'urgent':
+        return '🚨';
+      case 'high':
+        return '🔥';
+      default:
+        return '🔔';
     }
   };
 
   const getPriorityClass = () => {
     switch (notification.priority) {
-      case 'urgent': return 'urgent';
-      case 'high': return 'high';
-      default: return 'normal';
+      case 'urgent':
+        return 'urgent';
+      case 'high':
+        return 'high';
+      default:
+        return 'normal';
     }
   };
 
   return (
-    <div className={`in-app-notification ${getPriorityClass()} ${isVisible ? 'visible' : ''}`}>
+    <div className={`notification-popup ${getPriorityClass()} ${isVisible ? 'visible' : ''}`}>
       <div className="notification-header">
-        <div className="notification-icon">
-          {getPriorityIcon()}
-        </div>
+        <span className="notification-icon">{getPriorityIcon()}</span>
         <div className="notification-content">
           <h4 className="notification-title">{notification.title}</h4>
           <p className="notification-body">{notification.body}</p>
-          <span className="notification-time">{timeAgo}</span>
         </div>
-        <button className="notification-close" onClick={handleClose}>
-          ×
-        </button>
+        <div className="notification-meta">
+          <span className="notification-time">{timeAgo}</span>
+          <button className="notification-close" onClick={handleClose}>
+            ✕
+          </button>
+        </div>
       </div>
       
       {notification.actions && notification.actions.length > 0 && (
@@ -85,7 +92,7 @@ const InAppNotification = ({ notification, onClose, onAction }) => {
           {notification.actions.map((action, index) => (
             <button
               key={index}
-              className={`notification-action ${action.action === 'start-timer' ? 'primary' : 'secondary'}`}
+              className={`notification-action ${action.action === 'start-timer' ? 'primary' : ''}`}
               onClick={() => handleAction(action.action)}
             >
               {action.title}

@@ -160,3 +160,32 @@
     top: 180px;
   }
   
+  /* Add this to the top of your InAppNotification.css */
+.notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    pointer-events: none;
+    max-width: 400px;
+  }
+  
+  .notification-popup {
+    pointer-events: all;
+    margin-bottom: 10px;
+  }
+  
+  /* Mobile responsive notifications */
+  @media (max-width: 768px) {
+    .notification-container {
+      top: 10px;
+      right: 10px;
+      left: 10px;
+      max-width: none;
+    }
+    
+    .notification-popup {
+      margin-bottom: 8px;
+    }
+  }
+  

@@ -339,7 +339,8 @@ const Dashboard = ({ user, darkMode, setDarkMode }) => {
           >
             ⏱️ Timer
           </button>
-          
+
+
         </div>
 
         {/* Content Area */}
