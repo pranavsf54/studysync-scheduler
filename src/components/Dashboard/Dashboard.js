@@ -457,11 +457,17 @@ const Dashboard = ({ user, darkMode, setDarkMode }) => {
 
       {/* Settings Modal */}
       {showSettings && (
-        <Settings
-          user={user}
+        <Settings 
+          user={user} 
           onClose={() => setShowSettings(false)}
           darkMode={darkMode}
           setDarkMode={setDarkMode}
+          tasks={tasks}  // Pass tasks for export
+          onTasksImported={(importedTasks) => {
+            // Handle imported tasks - they'll automatically appear via Firestore listener
+            console.log(`📥 Imported ${importedTasks.length} tasks successfully`);
+            
+          }}
         />
       )}
     </div>
