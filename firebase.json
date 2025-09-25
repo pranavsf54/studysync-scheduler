@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "public",
+    "public": "build",
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -14,6 +14,8 @@
     ]
   },
   "firestore": {
+    "database": "(default)",
+    "location": "northamerica-northeast1",
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   }

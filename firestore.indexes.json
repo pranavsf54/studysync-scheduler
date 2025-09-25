@@ -1,34 +1,4 @@
 {
-    "indexes": [
-      {
-        "collectionGroup": "tasks",
-        "queryScope": "COLLECTION",
-        "fields": [
-          {
-            "fieldPath": "priority",
-            "order": "ASCENDING"
-          },
-          {
-            "fieldPath": "start",
-            "order": "ASCENDING"
-          }
-        ]
-      },
-      {
-        "collectionGroup": "tasks",
-        "queryScope": "COLLECTION",
-        "fields": [
-          {
-            "fieldPath": "completed",
-            "order": "ASCENDING"
-          },
-          {
-            "fieldPath": "start",
-            "order": "ASCENDING"
-          }
-        ]
-      }
-    ],
-    "fieldOverrides": []
-  }
-  
+  "indexes": [],
+  "fieldOverrides": []
+}
