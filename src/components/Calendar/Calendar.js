@@ -98,34 +98,87 @@ const Calendar = ({ tasks, onTaskClick, onSelectSlot, currentView }) => {
   const renderMonthView = () => {
     const monthStart = startOfMonth(currentDate);
     const monthEnd = endOfMonth(currentDate);
-    const calendarStart = startOfWeek(monthStart);
-    const calendarEnd = addDays(startOfWeek(monthEnd), 41);
+    const startDate = startOfWeek(monthStart);
+    const endDate = addDays(startOfWeek(monthEnd), 41); // Ensure 6 full weeks
     
-    const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd }).slice(0, 42);
+    const days = eachDayOfInterval({ start: startDate, end: endDate });
+    const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
     return (
       <div className="month-view">
-        <div className="weekday-headers">
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-            <div key={day} className="weekday-header">{day}</div>
+        <div className="month-calendar-container">
+          {/* Header cells - first row of grid */}
+          {weekdays.map(day => (
+            <div key={day} className="month-header-cell">
+              {day}
+            </div>
           ))}
-        </div>
-        <div className="month-grid">
-          {days.map(day => {
+          
+          {/* Day cells - remaining rows */}
+          {days.slice(0, 42).map(day => {
             const dayTasks = getTasksForDay(day);
+            const isToday = isSameDay(day, new Date());
+            const isCurrentMonth = isSameMonth(day, currentDate);
+            
             return (
-              <DayCell
-                key={day.toISOString()}
-                date={day}
-                dayTasks={dayTasks}
-                isCurrentMonth={isSameMonth(day, currentDate)}
-              />
+              <div
+                key={day.toString()}
+                className={`month-day-cell ${isToday ? 'today' : ''} ${!isCurrentMonth ? 'other-month' : ''}`}
+                onClick={() => onSelectSlot && onSelectSlot(day)}
+              >
+                <div className="day-header">
+                  <span className="day-number">
+                    {format(day, 'd')}
+                  </span>
+                  {dayTasks.length > 3 && (
+                    <span className="task-count">
+                      {dayTasks.length}
+                    </span>
+                  )}
+                </div>
+                
+                <div className="day-tasks">
+                  {dayTasks.slice(0, 3).map(task => (
+                    <TaskAbstract
+                      key={task.id}
+                      task={task}
+                      onClick={() => onTaskClick && onTaskClick(task)}
+                      isSmall={true}
+                    />
+                  ))}
+                  {dayTasks.length > 3 && (
+                    <div className="more-tasks">
+                      +{dayTasks.length - 3} more
+                    </div>
+                  )}
+                </div>
+              </div>
             );
           })}
         </div>
       </div>
     );
   };
+
+  if (currentView === 'month') {
+    return (
+      <div className="custom-calendar">
+        <div className="calendar-toolbar">
+          <div className="calendar-nav">
+            <button className="nav-btn" onClick={() => navigate('prev')}>‹</button>
+            <button className="nav-btn" onClick={() => navigate('next')}>›</button>
+          </div>
+          <h2 className="calendar-title">{formatDateHeader()}</h2>
+          <button className="nav-btn" onClick={() => setCurrentDate(new Date())}>
+            Today
+          </button>
+        </div>
+        <div className="calendar-content">
+          {renderMonthView()}
+        </div>
+      </div>
+    );
+  }
 
   const renderWeekView = () => {
     const weekStart = startOfWeek(currentDate);
