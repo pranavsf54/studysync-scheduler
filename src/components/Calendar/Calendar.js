@@ -104,15 +104,19 @@ const Calendar = ({ tasks, onTaskClick, onSelectSlot, currentView, onViewChange 
     
     const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd }).slice(0, 42);
     const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
+  
     return (
       <div className="month-view">
-        <div className="weekday-headers">
+        {/* Single Grid Container for Headers and Days */}
+        <div className="month-calendar-grid">
+          {/* Header Row */}
           {weekDays.map(day => (
-            <div key={day} className="weekday-header">{day}</div>
+            <div key={day} className="month-header-cell">
+              {day}
+            </div>
           ))}
-        </div>
-        <div className="month-grid">
+          
+          {/* Day Cells */}
           {days.map(day => {
             const dayTasks = getTasksForDay(day);
             return (
@@ -133,32 +137,52 @@ const Calendar = ({ tasks, onTaskClick, onSelectSlot, currentView, onViewChange 
     const weekStart = startOfWeek(currentDate);
     const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
     const weekDayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
+  
     return (
       <div className="week-view">
         <div className="week-headers">
           {weekDays.map((day, index) => (
             <div key={day.toISOString()} className="week-header">
               <div className="week-day-name">{weekDayNames[index]}</div>
-              <div className="week-day-number">{format(day, 'd')}</div>
             </div>
           ))}
         </div>
         <div className="week-grid">
-          {weekDays.map(day => {
+          {weekDays.map((day, index) => {
             const dayTasks = getTasksForDay(day);
+            const isToday = isSameDay(day, new Date());
+            
             return (
-              <DayCell
+              <div
                 key={day.toISOString()}
-                date={day}
-                dayTasks={dayTasks}
-              />
+                className={`week-day-cell ${isToday ? 'today' : ''}`}
+                onClick={() => onSelectSlot(day)}
+                data-day-name={weekDayNames[index]}
+                data-day-number={format(day, 'd')}
+              >
+                <div className="week-day-tasks">
+                  {dayTasks.map(task => (
+                    <div
+                      key={task.id}
+                      className={`task-abstract ${task.priority}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onTaskClick(task.id);
+                      }}
+                    >
+                      <span className="task-title">{task.title}</span>
+                      {task.priority === 'high' && <span className="priority-fire">🔥</span>}
+                    </div>
+                  ))}
+                </div>
+              </div>
             );
           })}
         </div>
       </div>
     );
   };
+  
 
   const renderDayView = () => {
     const dayTasks = getTasksForDay(currentDate);
