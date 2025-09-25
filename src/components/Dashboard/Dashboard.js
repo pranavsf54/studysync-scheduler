@@ -452,6 +452,8 @@ const Dashboard = ({ user, darkMode, setDarkMode }) => {
             setShowTaskForm(false);
             setEditingTask(null);
           }}
+          onDelete={handleDeleteTask} // ✅ Add onDelete prop
+          isRecurringEdit={editingTask?.recurrence !== 'none'}
         />
       )}
 
