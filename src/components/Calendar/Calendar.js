@@ -1,8 +1,12 @@
-import React, { useState, useMemo } from 'react';
-import { format, startOfWeek, addDays, isSameDay, addWeeks, subWeeks, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, addMonths, subMonths, isAfter, isBefore } from 'date-fns';
+import React, { useState } from 'react';
+import { 
+  format, startOfWeek, addDays, isSameDay, addWeeks, subWeeks, 
+  startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, 
+  addMonths, subMonths, isAfter, isBefore, isToday 
+} from 'date-fns';
 import './Calendar.css';
 
-const Calendar = ({ tasks, onTaskClick, onSelectSlot, currentView, onViewChange }) => {
+const Calendar = ({ tasks, onTaskClick, onSelectSlot, currentView }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const navigate = (direction) => {
@@ -51,11 +55,12 @@ const Calendar = ({ tasks, onTaskClick, onSelectSlot, currentView, onViewChange 
   };
 
   const TaskAbstract = ({ task, isSmall = false }) => (
-    <div 
+    <div
       className={`task-abstract ${task.priority} ${isSmall ? 'small' : ''}`}
-      style={{ borderLeftColor: task.color || '#3b82f6' }}
-      onClick={() => onTaskClick(task.id)}
-      title={`${task.title} - ${task.description || 'No description'}`}
+      onClick={(e) => {
+        e.stopPropagation();
+        onTaskClick(task.id);
+      }}
     >
       <span className="task-title">{task.title}</span>
       {task.priority === 'high' && <span className="priority-fire">🔥</span>}
@@ -63,14 +68,11 @@ const Calendar = ({ tasks, onTaskClick, onSelectSlot, currentView, onViewChange 
   );
 
   const DayCell = ({ date, dayTasks, isCurrentMonth = true }) => {
-    const isToday = isSameDay(date, new Date());
-    const maxVisible = currentView === 'month' ? 3 : currentView === 'week' ? 6 : 12;
-    const visibleTasks = dayTasks.slice(0, maxVisible);
-    const hiddenCount = dayTasks.length - maxVisible;
-
+    const isCurrentDay = isToday(date);
+    
     return (
-      <div 
-        className={`day-cell ${!isCurrentMonth ? 'other-month' : ''} ${isToday ? 'today' : ''}`}
+      <div
+        className={`day-cell ${isCurrentDay ? 'today' : ''} ${!isCurrentMonth ? 'other-month' : ''}`}
         onClick={() => onSelectSlot(date)}
       >
         <div className="day-header">
@@ -79,17 +81,14 @@ const Calendar = ({ tasks, onTaskClick, onSelectSlot, currentView, onViewChange 
             <span className="task-count">{dayTasks.length}</span>
           )}
         </div>
-        
         <div className="day-tasks">
-          {visibleTasks.map((task, index) => (
-            <TaskAbstract 
-              key={task.id} 
-              task={task} 
-              isSmall={currentView === 'month' || dayTasks.length > 4}
-            />
+          {dayTasks.slice(0, 3).map(task => (
+            <TaskAbstract key={task.id} task={task} isSmall={dayTasks.length > 2} />
           ))}
-          {hiddenCount > 0 && (
-            <div className="more-tasks">+{hiddenCount} more</div>
+          {dayTasks.length > 3 && (
+            <div className="more-tasks">
+              +{dayTasks.length - 3} more
+            </div>
           )}
         </div>
       </div>
@@ -103,20 +102,15 @@ const Calendar = ({ tasks, onTaskClick, onSelectSlot, currentView, onViewChange 
     const calendarEnd = addDays(startOfWeek(monthEnd), 41);
     
     const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd }).slice(0, 42);
-    const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  
+
     return (
       <div className="month-view">
-        {/* Single Grid Container for Headers and Days */}
-        <div className="month-calendar-grid">
-          {/* Header Row */}
-          {weekDays.map(day => (
-            <div key={day} className="month-header-cell">
-              {day}
-            </div>
+        <div className="weekday-headers">
+          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+            <div key={day} className="weekday-header">{day}</div>
           ))}
-          
-          {/* Day Cells */}
+        </div>
+        <div className="month-grid">
           {days.map(day => {
             const dayTasks = getTasksForDay(day);
             return (
@@ -137,42 +131,33 @@ const Calendar = ({ tasks, onTaskClick, onSelectSlot, currentView, onViewChange 
     const weekStart = startOfWeek(currentDate);
     const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
     const weekDayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  
+
     return (
       <div className="week-view">
         <div className="week-headers">
           {weekDays.map((day, index) => (
             <div key={day.toISOString()} className="week-header">
               <div className="week-day-name">{weekDayNames[index]}</div>
+              <div className="week-day-number">{format(day, 'd')}</div>
             </div>
           ))}
         </div>
         <div className="week-grid">
           {weekDays.map((day, index) => {
             const dayTasks = getTasksForDay(day);
-            const isToday = isSameDay(day, new Date());
+            const isCurrentDay = isToday(day);
             
             return (
               <div
                 key={day.toISOString()}
-                className={`week-day-cell ${isToday ? 'today' : ''}`}
+                className={`week-day-cell ${isCurrentDay ? 'today' : ''}`}
                 onClick={() => onSelectSlot(day)}
                 data-day-name={weekDayNames[index]}
                 data-day-number={format(day, 'd')}
               >
                 <div className="week-day-tasks">
                   {dayTasks.map(task => (
-                    <div
-                      key={task.id}
-                      className={`task-abstract ${task.priority}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onTaskClick(task.id);
-                      }}
-                    >
-                      <span className="task-title">{task.title}</span>
-                      {task.priority === 'high' && <span className="priority-fire">🔥</span>}
-                    </div>
+                    <TaskAbstract key={task.id} task={task} />
                   ))}
                 </div>
               </div>
@@ -182,7 +167,6 @@ const Calendar = ({ tasks, onTaskClick, onSelectSlot, currentView, onViewChange 
       </div>
     );
   };
-  
 
   const renderDayView = () => {
     const dayTasks = getTasksForDay(currentDate);
@@ -192,7 +176,7 @@ const Calendar = ({ tasks, onTaskClick, onSelectSlot, currentView, onViewChange 
         <div className="day-header-large">
           <h2>{format(currentDate, 'EEEE, MMMM d')}</h2>
           <div className="day-stats">
-            {dayTasks.length} task{dayTasks.length !== 1 ? 's' : ''}
+            {dayTasks.length} task{dayTasks.length !== 1 ? 's' : ''} scheduled
           </div>
         </div>
         
@@ -200,42 +184,31 @@ const Calendar = ({ tasks, onTaskClick, onSelectSlot, currentView, onViewChange 
           {dayTasks.length === 0 ? (
             <div className="no-tasks">
               <p>No tasks scheduled for this day</p>
-              <button 
-                className="btn btn--primary"
-                onClick={() => onSelectSlot(currentDate)}
-              >
-                Add Task
-              </button>
             </div>
           ) : (
-            dayTasks
-              .sort((a, b) => {
-                const timeA = a.start?.toDate ? a.start.toDate() : new Date(a.start);
-                const timeB = b.start?.toDate ? b.start.toDate() : new Date(b.start);
-                return timeA - timeB;
-              })
-              .map(task => (
-                <div 
-                  key={task.id} 
-                  className={`day-task-item ${task.priority}`}
-                  style={{ borderLeftColor: task.color || '#3b82f6' }}
-                  onClick={() => onTaskClick(task.id)}
-                >
-                  <div className="task-time">
-                    {format(task.start?.toDate ? task.start.toDate() : new Date(task.start), 'h:mm a')}
-                  </div>
-                  <div className="task-content">
-                    <h4>{task.title} {task.priority === 'high' && '🔥'}</h4>
-                    {task.description && <p>{task.description}</p>}
-                    <div className="task-meta">
-                      <span className="task-category">{task.category}</span>
-                      {task.recurrence && task.recurrence !== 'none' && (
-                        <span className="task-recurrence">🔄 {task.recurrence}</span>
-                      )}
-                    </div>
+            dayTasks.map(task => (
+              <div
+                key={task.id}
+                className={`day-task-item ${task.priority}`}
+                onClick={() => onTaskClick(task.id)}
+              >
+                <div className="task-time">
+                  {format(task.start?.toDate ? task.start.toDate() : new Date(task.start), 'h:mm a')}
+                </div>
+                <div className="task-content">
+                  <h4>{task.title}</h4>
+                  {task.description && <p>{task.description}</p>}
+                  <div className="task-meta">
+                    <span className="task-category">{task.category || 'GENERAL'}</span>
+                    {task.recurrence && task.recurrence !== 'none' && (
+                      <span className="task-recurrence">
+                        Repeats {task.recurrence}
+                      </span>
+                    )}
                   </div>
                 </div>
-              ))
+              </div>
+            ))
           )}
         </div>
       </div>
@@ -246,7 +219,7 @@ const Calendar = ({ tasks, onTaskClick, onSelectSlot, currentView, onViewChange 
     const monthStart = startOfMonth(currentDate);
     const monthEnd = endOfMonth(currentDate);
     const monthTasks = getTasksForDateRange(monthStart, monthEnd);
-    
+
     // Group tasks by date
     const tasksByDate = monthTasks.reduce((acc, task) => {
       const taskDate = task.start?.toDate ? task.start.toDate() : new Date(task.start);
@@ -258,42 +231,41 @@ const Calendar = ({ tasks, onTaskClick, onSelectSlot, currentView, onViewChange 
       return acc;
     }, {});
 
+    const sortedDates = Object.keys(tasksByDate).sort();
+
     return (
       <div className="agenda-view">
         <div className="agenda-header">
-          <h3>📋 Agenda for {format(currentDate, 'MMMM yyyy')}</h3>
+          <h3>📅 Agenda for {format(currentDate, 'MMMM yyyy')}</h3>
           <div className="agenda-stats">
-            {monthTasks.length} task{monthTasks.length !== 1 ? 's' : ''} scheduled
+            {monthTasks.length} tasks scheduled
           </div>
         </div>
-        
+
         <div className="agenda-content">
-          {Object.keys(tasksByDate).length === 0 ? (
+          {sortedDates.length === 0 ? (
             <div className="no-tasks">
               <p>No tasks scheduled this month</p>
-              <button 
-                className="btn btn--primary"
-                onClick={() => onSelectSlot(new Date())}
-              >
-                Add Your First Task
-              </button>
             </div>
           ) : (
-            Object.entries(tasksByDate).map(([dateKey, dateTasks]) => {
-              const date = new Date(dateKey + 'T00:00:00');
-              const isToday = isSameDay(date, new Date());
-              
+            sortedDates.map(dateKey => {
+              const date = new Date(dateKey);
+              const dateTasks = tasksByDate[dateKey];
+              const isCurrentDay = isToday(date);
+
               return (
-                <div key={dateKey} className={`agenda-date-section ${isToday ? 'today' : ''}`}>
+                <div
+                  key={dateKey}
+                  className={`agenda-date-section ${isCurrentDay ? 'today' : ''}`}
+                >
                   <div className="agenda-date-header">
-                    <h4>{format(date, 'EEEE, MMMM d, yyyy')}</h4>
-                    <span className="task-count">{dateTasks.length} task{dateTasks.length !== 1 ? 's' : ''}</span>
+                    <h4>{format(date, 'EEEE, MMMM d')}</h4>
+                    <span className="task-count">{dateTasks.length}</span>
                   </div>
-                  
                   <div className="agenda-tasks">
                     {dateTasks.map(task => (
-                      <div 
-                        key={task.id} 
+                      <div
+                        key={task.id}
                         className={`agenda-task-item ${task.priority}`}
                         onClick={() => onTaskClick(task.id)}
                       >
@@ -302,13 +274,17 @@ const Calendar = ({ tasks, onTaskClick, onSelectSlot, currentView, onViewChange 
                         </div>
                         <div className="task-content">
                           <div className="task-header">
-                            <h5>{task.title} {task.priority === 'high' && '🔥'}</h5>
-                            <span className="task-category">{task.category}</span>
+                            <h5>{task.title}</h5>
                           </div>
                           {task.description && <p>{task.description}</p>}
-                          {task.recurrence && task.recurrence !== 'none' && (
-                            <div className="task-recurrence">🔄 Repeats {task.recurrence}</div>
-                          )}
+                          <div className="task-meta">
+                            <span className="task-category">{task.category || 'GENERAL'}</span>
+                            {task.recurrence && task.recurrence !== 'none' && (
+                              <span className="task-recurrence">
+                                Repeats {task.recurrence}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -322,22 +298,47 @@ const Calendar = ({ tasks, onTaskClick, onSelectSlot, currentView, onViewChange 
     );
   };
 
+  const renderCurrentView = () => {
+    switch (currentView) {
+      case 'month':
+        return renderMonthView();
+      case 'week':
+        return renderWeekView();
+      case 'day':
+        return renderDayView();
+      case 'agenda':
+        return renderAgendaView();
+      default:
+        return renderMonthView();
+    }
+  };
+
   return (
     <div className="custom-calendar">
       <div className="calendar-toolbar">
         <div className="calendar-nav">
-          <button onClick={() => navigate('prev')} className="nav-btn">‹</button>
-          <div className="calendar-title">{formatDateHeader()}</div>
-          <button onClick={() => navigate('next')} className="nav-btn">›</button>
+          <button className="nav-btn" onClick={() => navigate('prev')}>
+            ‹
+          </button>
+          <button className="nav-btn" onClick={() => navigate('next')}>
+            ›
+          </button>
         </div>
         
+        <h1 className="calendar-title">
+          {formatDateHeader()}
+        </h1>
+        
+        <button 
+          className="nav-btn"
+          onClick={() => setCurrentDate(new Date())}
+        >
+          Today
+        </button>
       </div>
       
       <div className="calendar-content">
-        {currentView === 'month' && renderMonthView()}
-        {currentView === 'week' && renderWeekView()}
-        {currentView === 'day' && renderDayView()}
-        {currentView === 'agenda' && renderAgendaView()}
+        {renderCurrentView()}
       </div>
     </div>
   );

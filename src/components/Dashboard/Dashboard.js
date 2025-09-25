@@ -340,27 +340,6 @@ const Dashboard = ({ user, darkMode, setDarkMode }) => {
             ⏱️ Timer
           </button>
           
-          <button 
-  className="btn btn--primary"
-  onClick={() => {
-    // Test notification
-    notificationService.showNotification(
-      '🔥 Test High Priority Task',
-      'This is a test notification to make sure everything works!',
-      {
-        taskId: 'test-123',
-        type: 'during-task',
-        priority: 'high',
-        actions: [
-          { title: 'Start Timer', action: 'start-timer' },
-          { title: 'View Task', action: 'view-task' }
-        ]
-      }
-    );
-  }}
->
-  🔔 Test Notification
-</button>
         </div>
 
         {/* Content Area */}

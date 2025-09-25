@@ -100,7 +100,7 @@
   flex: 1;
 }
 
-/* Week View - FIXED LAYOUT */
+/* Week View */
 .week-view {
   height: 100%;
   display: grid;
@@ -147,7 +147,6 @@
   color: var(--color-text-secondary);
 }
 
-/* IMPROVED: Week Grid with Dynamic Heights */
 .week-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -165,7 +164,7 @@
   transition: var(--transition);
   display: flex;
   flex-direction: column;
-  min-height: 200px; /* Minimum height */
+  min-height: 200px;
   overflow: hidden;
 }
 
@@ -235,7 +234,7 @@
   font-size: var(--font-size-lg);
 }
 
-/* Day Cells - Shared between Month and Week */
+/* Day Cells */
 .day-cell {
   border-right: 1px solid var(--color-border-light);
   border-bottom: 1px solid var(--color-border-light);
@@ -371,7 +370,7 @@
   margin-top: 4px;
 }
 
-/* Agenda View Styles */
+/* Agenda View */
 .agenda-view {
   padding: var(--space-xl);
   height: 100%;
@@ -556,55 +555,398 @@
   font-weight: var(--font-weight-medium);
 }
 
-/* Mobile Responsive */
+/* Mobile Responsive - MONTH VIEW FIXED */
 @media (max-width: 768px) {
   .calendar-toolbar {
-    padding: var(--space) var(--space-lg);
-    flex-direction: column;
-    gap: var(--space);
+    padding: var(--space-sm) var(--space);
+    flex-direction: row;
+    gap: var(--space-sm);
+    justify-content: space-between;
+    flex-wrap: nowrap;
   }
   
   .calendar-title {
-    font-size: var(--font-size-lg);
+    font-size: 14px;
     min-width: auto;
-    order: 1;
+    flex: 1;
+    text-align: center;
+    margin: 0 var(--space-xs);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
   .calendar-nav {
-    order: 2;
-    gap: var(--space);
+    gap: var(--space-xs);
+  }
+  
+  .nav-btn {
+    min-width: 32px;
+    height: 32px;
+    padding: var(--space-xs);
+    font-size: 14px;
+  }
+
+  /* MONTH VIEW - Perfect Mobile Alignment */
+  .month-view {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  /* Fixed weekday headers */
+  .weekday-headers {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: var(--color-hover);
+    border-bottom: 1px solid var(--color-border-light);
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .weekday-header {
+    padding: 6px 2px;
+    text-align: center;
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    font-size: 10px;
+    border-right: 1px solid var(--color-border-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    max-height: 28px;
+    box-sizing: border-box;
+    line-height: 1;
+  }
+  
+  .weekday-header:last-child {
+    border-right: none;
+  }
+  
+  /* Fixed month grid */
+  .month-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(6, minmax(60px, auto));
+    flex: 1;
+    background: var(--color-surface);
+    margin: 0;
+    padding: 0;
+    gap: 0;
+    border: none;
+    overflow: hidden;
+  }
+  
+  /* Fixed day cells */
+  .day-cell {
+    background: var(--color-surface);
+    border-right: 1px solid var(--color-border-light);
+    border-bottom: 1px solid var(--color-border-light);
+    padding: 3px 2px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    min-height: 60px;
+    max-height: 80px;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+  
+  /* Remove right border from last column */
+  .day-cell:nth-child(7n) {
+    border-right: none;
+  }
+  
+  .day-cell:hover {
+    background: var(--color-hover);
+  }
+  
+  .day-cell.today {
+    background: rgba(59, 130, 246, 0.05);
+    box-shadow: inset 0 0 0 1px var(--color-primary);
+  }
+  
+  .day-cell.other-month {
+    background: var(--color-disabled);
+    opacity: 0.5;
+  }
+  
+  .day-cell.other-month .day-number {
+    color: var(--color-text-tertiary);
+  }
+  
+  /* Fixed day header */
+  .day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2px;
+    min-height: 16px;
+    flex-shrink: 0;
+  }
+  
+  .day-number {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    font-size: 10px;
+    line-height: 1;
+  }
+  
+  .day-cell.today .day-number {
+    background: var(--color-primary);
+    color: var(--color-text-inverse);
+    width: 16px;
+    height: 16px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: var(--font-weight-bold);
+  }
+  
+  .task-count {
+    background: var(--color-primary);
+    color: var(--color-text-inverse);
+    font-size: 7px;
+    padding: 1px 3px;
+    border-radius: var(--radius-full);
+    font-weight: var(--font-weight-semibold);
+    min-width: 10px;
+    text-align: center;
+    line-height: 1;
+  }
+  
+  /* Fixed day tasks */
+  .day-tasks {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    overflow: hidden;
+  }
+  
+  .task-abstract {
+    background: var(--color-primary);
+    color: var(--color-text-inverse);
+    padding: 1px 3px;
+    border-radius: 2px;
+    font-size: 7px;
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 2px solid transparent;
+    margin-bottom: 1px;
+    overflow: hidden;
+    line-height: 1.1;
+    min-height: 12px;
+  }
+  
+  .task-abstract:hover {
+    opacity: 0.9;
+  }
+  
+  .task-abstract.high {
+    background: var(--color-error);
+    border-left-color: #b91c1c;
+  }
+  
+  .task-title {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .priority-fire {
+    font-size: 6px;
+    margin-left: 2px;
+  }
+  
+  .more-tasks {
+    color: var(--color-text-tertiary);
+    font-size: 7px;
+    text-align: center;
+    padding: 1px;
+    font-weight: var(--font-weight-medium);
+    background: var(--color-border-light);
+    border-radius: 2px;
+    margin-top: 1px;
+    line-height: 1;
+  }
+  
+  /* Week view mobile */
+  .week-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-xs);
+  }
+  
+  .week-headers {
+    display: none;
+  }
+  
+  .week-day-cell {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    min-height: 100px;
+    margin-bottom: var(--space-xs);
+  }
+  
+  .week-day-cell::before {
+    content: attr(data-day-name) ' ' attr(data-day-number);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-primary);
+    padding: var(--space-xs);
+    border-bottom: 1px solid var(--color-border-light);
+    display: block;
+    background: var(--color-hover);
+  }
+  
+  /* Day view mobile */
+  .day-view {
+    padding: var(--space);
+  }
+  
+  .day-task-item {
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding: var(--space-sm);
+  }
+  
+  .task-time {
+    min-width: auto;
+    font-size: var(--font-size-xs);
+  }
+  
+  /* Agenda view mobile */
+  .agenda-view {
+    padding: var(--space);
+  }
+  
+  .agenda-date-header {
+    flex-direction: column;
+    gap: var(--space-xs);
+    align-items: flex-start;
+    padding: var(--space-sm);
+  }
+  
+  .agenda-task-item {
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding: var(--space-sm);
+  }
+}
+
+/* Extra small screens - phones in portrait */
+@media (max-width: 480px) {
+  .calendar-title {
+    font-size: 12px;
+  }
+  
+  .nav-btn {
+    min-width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+  
+  .weekday-header {
+    font-size: 9px;
+    padding: 4px 1px;
+    min-height: 24px;
+    max-height: 24px;
   }
   
   .day-cell {
-    min-height: 90px;
+    min-height: 55px;
+    max-height: 75px;
+    padding: 2px 1px;
+  }
+  
+  .day-number {
+    font-size: 9px;
+  }
+  
+  .task-abstract {
+    font-size: 6px;
+    padding: 1px 2px;
+    min-height: 10px;
+  }
+  
+  .task-count {
+    font-size: 6px;
+    padding: 0px 2px;
+    min-width: 8px;
   }
 }
 
-.month-calendar-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  grid-template-rows: auto repeat(6, minmax(120px, auto));
-  gap: 1px;
-  background: var(--color-border-light);
-  height: 100%;
+/* Prevent text selection and cursor issues */
+.custom-calendar * {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.month-header-cell {
-  background: var(--color-hover);
-  padding: var(--space) var(--space-sm);
-  text-align: center;
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  font-size: var(--font-size-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 50px;
-  border-bottom: 2px solid var(--color-border-light);
+.nav-btn,
+.day-cell,
+.week-day-cell,
+.task-abstract,
+.day-task-item,
+.agenda-task-item {
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
-/* Update day-cell for grid layout */
-.month-calendar-grid .day-cell {
-  border: none;
-  background: var(--color-surface);
+/* Ensure buttons don't show text cursor */
+button {
+  cursor: pointer !important;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Allow text selection only where needed */
+.task-content p,
+.task-description {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* Prevent horizontal overflow */
+.custom-calendar {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.calendar-content {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.month-grid,
+.week-grid {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Ensure proper box sizing */
+.custom-calendar *,
+.custom-calendar *::before,
+.custom-calendar *::after {
+  box-sizing: border-box;
 }
